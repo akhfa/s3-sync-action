@@ -37,13 +37,25 @@ ${AWS_REGION}
 text
 EOF
 
+if [ -z "${ACTION}" ]; then
+  ${ACTION}="UPLOAD"
+fi
+
 # Sync using our dedicated profile and suppress verbose messages.
 # All other flags are optional via the `args:` directive.
-sh -c "aws s3 sync ${SOURCE_DIR:-.} s3://${AWS_S3_BUCKET}/${DEST_DIR} \
-              --profile s3-sync-action \
-              --no-progress \
-              ${ENDPOINT_APPEND} $*"
-
+if [ ${ACTION} == "UPLOAD" ]; then
+  sh -c "aws s3 sync ${SOURCE_DIR:-.} s3://${AWS_S3_BUCKET}/${DEST_DIR} \
+                --profile s3-sync-action \
+                --no-progress \
+                ${ENDPOINT_APPEND} $*"
+elif [ ${ACTION} == "DOWNLOAD" ]; then
+  sh -c "aws s3 sync s3://${AWS_S3_BUCKET}/${SOURCE_DIR} ${DEST_DIR:-.} \
+                --profile s3-sync-action \
+                --no-progress \
+                ${ENDPOINT_APPEND} $*"
+else
+  echo "Wrong ACTION. Please choose between UPLOAD or DOWNLOAD";
+fi
 # Clear out credentials after we're done.
 # We need to re-run `aws configure` with bogus input instead of
 # deleting ~/.aws in case there are other credentials living there.
