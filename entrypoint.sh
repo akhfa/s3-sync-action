@@ -44,14 +44,16 @@ fi
 # Sync using our dedicated profile and suppress verbose messages.
 # All other flags are optional via the `args:` directive.
 if [ ${ACTION} == "UPLOAD" ]; then
-  sh -c "aws s3 sync ${SOURCE_DIR:-.} s3://${AWS_S3_BUCKET}/${DEST_DIR} \
+  sh -c "aws s3 mv ${SOURCE_DIR:-.} s3://${AWS_S3_BUCKET}/${DEST_DIR} \
                 --profile s3-sync-action \
                 --no-progress \
+                --recursive \
                 ${ENDPOINT_APPEND} $*"
 elif [ ${ACTION} == "DOWNLOAD" ]; then
-  sh -c "aws s3 sync s3://${AWS_S3_BUCKET}/${SOURCE_DIR} ${DEST_DIR:-.} \
+  sh -c "aws s3 mv s3://${AWS_S3_BUCKET}/${SOURCE_DIR} ${DEST_DIR:-.} \
                 --profile s3-sync-action \
                 --no-progress \
+                --recursive \
                 ${ENDPOINT_APPEND} $*"
 else
   echo "Wrong ACTION. Please choose between UPLOAD or DOWNLOAD";
